@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>Admin Panel</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{
+font-family:'Courier New',monospace;
+background:#f5f5f5;
+display:flex;
+justify-content:center;
+padding:40px;
+color:#222;
+}
+.container{
+width:100%;
+max-width:800px;
+}
+.title{
+font-size:2rem;
+letter-spacing:6px;
+margin-bottom:30px;
+}
+.create-btn{
+padding:12px 20px;
+background:#222;
+color:white;
+border:none;
+border-radius:8px;
+cursor:pointer;
+letter-spacing:3px;
+margin-bottom:25px;
+}
+.test-card{
+background:white;
+padding:20px;
+margin-bottom:15px;
+border-radius:10px;
+box-shadow:0 8px 20px rgba(0,0,0,0.08);
+}
+.test-title{
+font-size:1.2rem;
+margin-bottom:8px;
+font-weight:bold;
+}
+.test-type{
+font-size:0.8rem;
+color:#666;
+margin-bottom:8px;
+}
+.actions button{
+margin-right:10px;
+padding:6px 12px;
+border:none;
+border-radius:6px;
+cursor:pointer;
+}
+.edit{background:#444;color:white;}
+.delete{background:#c0392b;color:white;}
+input,textarea{
+width:100%;
+padding:10px;
+margin-bottom:10px;
+border:1px solid #ccc;
+border-radius:6px;
+font-family:'Courier New',monospace;
+}
+.question{
+background:white;
+padding:20px;
+margin-bottom:20px;
+border-radius:10px;
+box-shadow:0 6px 15px rgba(0,0,0,0.08);
+}
+button{
+padding:10px 16px;
+margin-top:5px;
+cursor:pointer;
+border:none;
+border-radius:6px;
+background:#222;
+color:white;
+font-family:'Courier New',monospace;
+}
+.delete-btn{
+background:#c0392b;
+}
+.answer{
+display:flex;
+gap:10px;
+margin-bottom:5px;
+align-items:center;
+}
+.top-buttons{
+margin-top:20px;
+display:flex;
+gap:10px;
+}
+.hidden{display:none;}
+.access-denied{
+text-align:center;
+padding:50px;
+background:white;
+border-radius:10px;
+box-shadow:0 8px 20px rgba(0,0,0,0.08);
+}
+.access-denied h2{color:#c0392b;margin-bottom:20px;}
+.access-denied button{
+padding:10px 20px;
+background:#222;
+color:white;
+border:none;
+border-radius:6px;
+cursor:pointer;
+}
+.test-type-select{
+width:100%;
+padding:10px;
+margin-bottom:10px;
+border:1px solid #ccc;
+border-radius:6px;
+font-family:'Courier New',monospace;
+}
+</style>
+</head>
+<body>
+<div class="container" id="app">
+    <!-- Проверка доступа -->
+    <div id="accessCheck" class="access-denied">
+        <h2>Проверка доступа...</h2>
+    </div>
+
+    <!-- Admin Panel View -->
+    <div id="adminPanel" class="hidden">
+        <h1 class="title">ADMIN PANEL</h1>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+            <button class="create-btn" onclick="showCreate()">CREATE TEST</button>
+            <button onclick="logout()" style="background:#666;">ВЫЙТИ</button>
+        </div>
+        <div id="tests"></div>
+    </div>
+
+    <!-- Create/Edit Test View -->
+    <div id="testEditor" class="hidden">
+        <h2 id="editorTitle">Create Test</h2>
+        <input id="testId" type="hidden">
+        <input id="title" placeholder="Название теста">
+        <textarea id="desc" placeholder="Описание"></textarea>
+        <select id="testType" class="test-type-select">
+            <option value="exit_vibe">Кто ты из EXIT?</option>
+            <option value="rowansa">Тест на ROWANS</option>
+            <option value="personality">Тип личности</option>
+            <option value="custom">Пользовательский тест</option>
+        </select>
+        <div id="questions"></div>
+        <button onclick="addQuestion()">Add Question</button>
+        <div class="top-buttons">
+            <button id="saveBtn" onclick="saveTest()">Save Test</button>
+            <button id="deleteTestBtn" class="delete-btn hidden" onclick="deleteCurrentTest()">Delete Test</button>
+            <button onclick="showAdminPanel()">Cancel</button>
+        </div>
+    </div>
+</div>
+
+<script>
+// Проверка доступа
+const user = JSON.parse(localStorage.getItem('user') || '{}');
+
+async function checkAdminAccess() {
+    const accessDiv = document.getElementById('accessCheck');
+    const adminPanel = document.getElementById('adminPanel');
+    
+    if (!user || !user.id) {
+        accessDiv.innerHTML = '<h2>Доступ запрещен</h2><p>Вы не авторизованы</p><button onclick="window.location.href=\'/\'">На главную</button>';
+        return;
+    }
+    
+    try {
+        const response = await fetch('/api/check-admin', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({userId: user.id, email: user.email})
+        });
+        
+        const result = await response.json();
+        
+        if (result.isAdmin) {
+            accessDiv.classList.add('hidden');
+            adminPanel.classList.remove('hidden');
+            loadTests();
+        } else {
+            accessDiv.innerHTML = '<h2>Доступ запрещен</h2><p>У вас нет прав администратора</p><button onclick="window.location.href=\'/main.html\'">На главную</button>';
+        }
+    } catch(err) {
+        console.error(err);
+        accessDiv.innerHTML = '<h2>Ошибка</h2><p>Не удалось проверить доступ</p><button onclick="window.location.href=\'/\'">На главную</button>';
+    }
+}
+
+// State
+let tests = [];
+let questions = [];
+let editIndex = null;
+
+// DOM elements
+const adminPanel = document.getElementById('adminPanel');
+const testEditor = document.getElementById('testEditor');
+const editorTitle = document.getElementById('editorTitle');
+const deleteTestBtn = document.getElementById('deleteTestBtn');
+const saveBtn = document.getElementById('saveBtn');
+
+// Загрузка тестов с сервера
+async function loadTests() {
+    try {
+        const response = await fetch('/api/get-tests');
+        const result = await response.json();
+        
+        if (result.tests) {
+            tests = result.tests;
+        } else {
+            tests = [];
+        }
+        
+        renderTests();
+    } catch(err) {
+        console.error(err);
+        tests = [];
+        renderTests();
+    }
+}
+
+function renderTests() {
+    const container = document.getElementById("tests");
+    container.innerHTML = "";
+
+    tests.forEach((test, index) => {
+        const div = document.createElement("div");
+        div.className = "test-card";
+        
+        let typeText = '';
+        if (test.test_type === 'exit_vibe') typeText = 'Кто ты из EXIT?';
+        else if (test.test_type === 'rowansa') typeText = 'Тест на ROWANS';
+        else if (test.test_type === 'personality') typeText = 'Тип личности';
+        else typeText = test.test_type;
+        
+        div.innerHTML = `
+            <div class="test-title">${test.title || 'Без названия'}</div>
+            <div class="test-type">${typeText}</div>
+            <div>${test.description || ''}</div>
+            <div class="actions">
+                <button class="edit" onclick="editTest(${test.id})">Edit</button>
+                <button class="delete" onclick="deleteTest(${test.id})">Delete</button>
+            </div>
+        `;
+        container.appendChild(div);
+    });
+}
+
+async function deleteTest(testId) {
+    if(confirm("Удалить тест?")) {
+        try {
+            const response = await fetch('/api/delete-test', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    test_id: testId,
+                    user_id: user.id
+                })
+            });
+            
+            const result = await response.json();
+            
+            if (result.status === 'success') {
+                loadTests();
+            } else {
+                alert('Ошибка при удалении теста');
+            }
+        } catch(err) {
+            console.error(err);
+            alert('Ошибка сети');
+        }
+    }
+}
+
+async function editTest(testId) {
+    try {
+        const response = await fetch('/api/get-test', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({testId})
+        });
+        
+        const result = await response.json();
+        
+        if (result.test) {
+            const test = result.test;
+            editIndex = test.id;
+            questions = test.questions || [];
+            
+            document.getElementById("testId").value = test.id || '';
+            document.getElementById("title").value = test.title || '';
+            document.getElementById("desc").value = test.description || '';
+            document.getElementById("testType").value = test.test_type || 'custom';
+            
+            editorTitle.textContent = "Edit Test";
+            deleteTestBtn.classList.remove('hidden');
+            saveBtn.textContent = "Save Changes";
+            
+            renderQuestions();
+            showEditor();
+        }
+    } catch(err) {
+        console.error(err);
+        alert('Ошибка загрузки теста');
+    }
+}
+
+function showCreate() {
+    editIndex = null;
+    questions = [];
+    document.getElementById("testId").value = '';
+    document.getElementById("title").value = '';
+    document.getElementById("desc").value = '';
+    document.getElementById("testType").value = 'custom';
+    
+    editorTitle.textContent = "Create Test";
+    deleteTestBtn.classList.add('hidden');
+    saveBtn.textContent = "Save Test";
+    
+    renderQuestions();
+    showEditor();
+}
+
+function showAdminPanel() {
+    adminPanel.classList.remove('hidden');
+    testEditor.classList.add('hidden');
+    loadTests();
+}
+
+function showEditor() {
+    adminPanel.classList.add('hidden');
+    testEditor.classList.remove('hidden');
+}
+
+// Question editor functions
+function renderQuestions() {
+    const container = document.getElementById("questions");
+    container.innerHTML = "";
+
+    questions.forEach((q, qIndex) => {
+        const div = document.createElement("div");
+        div.className = "question";
+
+        let answersHTML = "";
+        q.answers.forEach((a, aIndex) => {
+            answersHTML += `
+                <div class="answer">
+                    <input value="${a ? a.replace(/"/g, '&quot;') : ''}" placeholder="Answer"
+                        oninput="updateAnswerText(${qIndex}, ${aIndex}, this.value)">
+                    <input type="radio" name="correct${qIndex}" 
+                        ${q.correct === aIndex ? "checked" : ""}
+                        onclick="setCorrect(${qIndex}, ${aIndex})">
+                    <button class="delete-btn" onclick="deleteAnswer(${qIndex}, ${aIndex})">X</button>
+                </div>
+            `;
+        });
+
+        div.innerHTML = `
+            <input value="${q.text ? q.text.replace(/"/g, '&quot;') : ''}" placeholder="Question"
+                oninput="questions[${qIndex}].text=this.value">
+            ${answersHTML}
+            <button onclick="addAnswer(${qIndex})">Add Answer</button>
+            <button class="delete-btn" onclick="deleteQuestion(${qIndex})">Delete Question</button>
+        `;
+        container.appendChild(div);
+    });
+}
+
+function updateAnswerText(qIndex, aIndex, value) {
+    questions[qIndex].answers[aIndex] = value;
+}
+
+function addQuestion() {
+    questions.push({ text: "", answers: ["", "", "", ""], correct: 0 });
+    renderQuestions();
+}
+
+function deleteQuestion(index) {
+    questions.splice(index, 1);
+    renderQuestions();
+}
+
+function addAnswer(qIndex) {
+    questions[qIndex].answers.push("");
+    renderQuestions();
+}
+
+function deleteAnswer(qIndex, aIndex) {
+    questions[qIndex].answers.splice(aIndex, 1);
+    if (questions[qIndex].correct >= aIndex) {
+        questions[qIndex].correct = Math.max(0, questions[qIndex].correct - 1);
+    }
+    renderQuestions();
+}
+
+function setCorrect(qIndex, aIndex) {
+    questions[qIndex].correct = aIndex;
+}
+
+async function saveTest() {
+    const title = document.getElementById("title").value;
+    const desc = document.getElementById("desc").value;
+    const testType = document.getElementById("testType").value;
+
+    if (!title.trim()) {
+        alert("Введите название теста");
+        return;
+    }
+
+    if (questions.length === 0) {
+        alert("Добавьте хотя бы один вопрос");
+        return;
+    }
+
+    for (let i = 0; i < questions.length; i++) {
+        const q = questions[i];
+        if (!q.text.trim()) {
+            alert(`Вопрос ${i+1} не имеет текста`);
+            return;
+        }
+        
+        const validAnswers = q.answers.filter(a => a && a.trim());
+        if (validAnswers.length < 2) {
+            alert(`В вопросе ${i+1} должно быть минимум 2 варианта ответа`);
+            return;
+        }
+        
+        if (q.correct === undefined || q.correct === null || q.correct >= q.answers.length) {
+            alert(`В вопросе ${i+1} не выбран правильный ответ`);
+            return;
+        }
+    }
+
+    try {
+        const response = await fetch('/api/save-test', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                test_id: editIndex,
+                title,
+                description: desc,
+                test_type: testType,
+                questions: questions,
+                created_by: user.id
+            })
+        });
+        
+        const result = await response.json();
+        
+        if (result.status === 'success') {
+            alert('Тест успешно сохранен!');
+            showAdminPanel();
+        } else {
+            alert('Ошибка при сохранении теста: ' + (result.error || 'Неизвестная ошибка'));
+        }
+    } catch(err) {
+        console.error(err);
+        alert('Ошибка сети');
+    }
+}
+
+async function deleteCurrentTest() {
+    if (editIndex !== null && confirm("Удалить тест?")) {
+        try {
+            const response = await fetch('/api/delete-test', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    test_id: editIndex,
+                    user_id: user.id
+                })
+            });
+            
+            const result = await response.json();
+            
+            if (result.status === 'success') {
+                alert('Тест удален');
+                showAdminPanel();
+            } else {
+                alert('Ошибка при удалении теста');
+            }
+        } catch(err) {
+            console.error(err);
+            alert('Ошибка сети');
+        }
+    }
+}
+
+function logout() {
+    localStorage.removeItem('user');
+    window.location.href = '/';
+}
+
+// Initialize
+checkAdminAccess();
+</script>
+</body>
+</html>
