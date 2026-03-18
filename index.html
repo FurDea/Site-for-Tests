@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>R.T.F. & ROWANS | Вход / Регистрация</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{min-height:100vh;display:flex;align-items:center;justify-content:center;font-family:'Courier New',monospace;background:#f5f5f5;position:relative;color:#222;}
+.background-image{position:fixed;inset:0;background-size:contain;background-position:left center;background-repeat:no-repeat;background-color:#f5f5f5;z-index:1;}
+.center-container{position:relative;z-index:20;width:100%;max-width:520px;display:flex;flex-direction:column;align-items:center;}
+.main-title{font-size:2.6rem;letter-spacing:8px;text-transform:uppercase;color:#222;border-right:3px solid #666;white-space:nowrap;overflow:hidden;width:0;animation:typing 3s steps(24,end) forwards, blink .8s infinite;margin-bottom:2rem;font-weight:600;}
+@keyframes typing{from{width:0}to{width:100%}}
+@keyframes blink{50%{border-color:transparent}}
+.modal{width:100%;max-width:460px;background:rgba(255,255,255,0.95);backdrop-filter:blur(4px);border:1px solid rgba(0,0,0,0.1);box-shadow:0 10px 30px rgba(0,0,0,0.15);border-radius:10px;}
+.modal-content{padding:2.7rem;}
+.tabs{display:flex;margin-bottom:2rem;border-bottom:1px solid #ccc;}
+.tab{flex:1;text-align:center;padding:0.8rem;cursor:pointer;font-weight:600;letter-spacing:2px;font-size:0.9rem;transition:0.2s;}
+.tab.active{background:#222;color:white;}
+.input-group{margin-bottom:1.5rem;}
+.input-group label{display:block;margin-bottom:0.4rem;font-size:0.75rem;letter-spacing:2px;text-transform:uppercase;color:#444;font-weight:600;}
+.input-wrapper{position:relative;}
+.input-group input{width:100%;padding:0.9rem 1rem;padding-right:3rem;background:white;border:1px solid #ccc;color:#222;font-size:1rem;outline:none;border-radius:6px;transition:.2s;font-weight:500;}
+.input-group input::placeholder{color:#999;font-weight:400;}
+.input-group input:focus{border-color:#666;box-shadow:0 0 0 2px rgba(0,0,0,0.05);}
+.toggle-password{position:absolute;right:12px;top:50%;transform:translateY(-50%);cursor:pointer;font-size:1.1rem;color:#666;}
+.toggle-password:hover{color:#222;}
+.register-btn{width:100%;padding:1rem;margin:1rem 0 1rem;background:#222;border:1px solid #222;color:white;letter-spacing:5px;text-transform:uppercase;cursor:pointer;border-radius:8px;transition:.2s;font-weight:600;}
+.register-btn:hover{background:#444;border-color:#444;box-shadow:0 5px 15px rgba(0,0,0,0.1);}
+.toggle-link{text-align:center;font-size:0.8rem;color:#666;margin-top:1rem;}
+.toggle-link span{color:#222;text-decoration:none;border-bottom:1px dashed #999;font-weight:600;cursor:pointer;}
+.toggle-link span:hover{color:#000;border-bottom-color:#222;}
+.error-message{color:#c0392b;font-size:0.8rem;margin-top:0.5rem;text-align:center;min-height:20px;}
+</style>
+</head>
+<body>
+
+<div class="background-image" id="bgImage"></div>
+
+<div class="center-container">
+    <h1 class="main-title">R.T.F. & ROWANS</h1>
+
+    <div class="modal">
+        <div class="modal-content">
+            <div class="tabs">
+                <div class="tab active" id="loginTab" onclick="switchTab('login')">ВХОД</div>
+                <div class="tab" id="registerTab" onclick="switchTab('register')">РЕГИСТРАЦИЯ</div>
+            </div>
+
+            <!-- Форма входа -->
+            <div id="loginForm">
+                <div class="input-group">
+                    <label>Эл. почта</label>
+                    <input type="email" id="loginEmail" placeholder="mail@domain.com">
+                </div>
+
+                <div class="input-group">
+                    <label>Пароль</label>
+                    <div class="input-wrapper">
+                        <input type="password" id="loginPassword" placeholder="··········">
+                        <span class="toggle-password" onclick="togglePasswordVisibility('loginPassword',this)">👁</span>
+                    </div>
+                </div>
+
+                <button class="register-btn" id="loginBtn">ВОЙТИ</button>
+            </div>
+
+            <!-- Форма регистрации -->
+            <div id="registerForm" style="display: none;">
+                <div class="input-group">
+                    <label>Имя пользователя</label>
+                    <input type="text" id="username" placeholder="введите логин">
+                </div>
+
+                <div class="input-group">
+                    <label>Эл. почта</label>
+                    <input type="email" id="email" placeholder="mail@domain.com">
+                </div>
+
+                <div class="input-group">
+                    <label>Пароль</label>
+                    <div class="input-wrapper">
+                        <input type="password" id="password" placeholder="··········">
+                        <span class="toggle-password" onclick="togglePasswordVisibility('password',this)">👁</span>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label>Подтверждение</label>
+                    <div class="input-wrapper">
+                        <input type="password" id="confirm-password" placeholder="ещё раз">
+                        <span class="toggle-password" onclick="togglePasswordVisibility('confirm-password',this)">👁</span>
+                    </div>
+                </div>
+
+                <button class="register-btn" id="registerBtn">РЕГИСТРАЦИЯ</button>
+            </div>
+
+            <div class="toggle-link" id="toggleLink">
+                <span onclick="switchTab( document.getElementById('loginForm').style.display === 'none' ? 'login' : 'register' )">
+                    <span id="toggleLinkText">уже есть профиль? войти</span>
+                </span>
+            </div>
+            <div class="error-message" id="errorMessage"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+function togglePasswordVisibility(id,el){
+    const input=document.getElementById(id);
+    if(input.type==="password"){
+        input.type="text"; el.textContent="🔒";
+    }else{ input.type="password"; el.textContent="👁"; }
+}
+
+window.addEventListener("load",function(){
+    const bg=document.getElementById("bgImage");
+    bg.style.backgroundImage="url('https://drive.google.com/thumbnail?id=1KGaNrUPRt3xpT9KeecUOYWtVUA1_Nw4M&sz=w1920')";
+    
+    // Проверяем, есть ли уже пользователь в localStorage
+    const user = localStorage.getItem('user');
+    if (user) {
+        // Если есть, проверяем роль и перенаправляем
+        const userData = JSON.parse(user);
+        if (userData.role === 'admin') {
+            window.location.href = '/admin';
+        } else {
+            window.location.href = '/main.html';
+        }
+    }
+});
+
+function switchTab(tab) {
+    const loginForm = document.getElementById('loginForm');
+    const registerForm = document.getElementById('registerForm');
+    const loginTab = document.getElementById('loginTab');
+    const registerTab = document.getElementById('registerTab');
+    const toggleLinkText = document.getElementById('toggleLinkText');
+    
+    if (tab === 'login') {
+        loginForm.style.display = 'block';
+        registerForm.style.display = 'none';
+        loginTab.classList.add('active');
+        registerTab.classList.remove('active');
+        toggleLinkText.textContent = 'нет профиля? зарегистрироваться';
+    } else {
+        loginForm.style.display = 'none';
+        registerForm.style.display = 'block';
+        loginTab.classList.remove('active');
+        registerTab.classList.add('active');
+        toggleLinkText.textContent = 'уже есть профиль? войти';
+    }
+    document.getElementById('errorMessage').textContent = '';
+}
+
+// Функция для входа
+async function login() {
+    const email = document.getElementById('loginEmail').value.trim();
+    const password = document.getElementById('loginPassword').value;
+    
+    if (!email || !password) {
+        document.getElementById('errorMessage').textContent = 'Заполните все поля';
+        return;
+    }
+    
+    try {
+        const response = await fetch('/api/login', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({email, password})
+        });
+        
+        const result = await response.json();
+        
+        if (response.ok && result.status === 'success') {
+            localStorage.setItem('user', JSON.stringify(result.user));
+            // Перенаправляем в зависимости от роли
+            if (result.user.role === 'admin') {
+                window.location.href = '/admin';
+            } else {
+                window.location.href = '/main.html';
+            }
+        } else {
+            document.getElementById('errorMessage').textContent = result.error || 'Ошибка входа';
+        }
+    } catch(err) {
+        console.error(err);
+        document.getElementById('errorMessage').textContent = 'Ошибка сети. Попробуйте позже.';
+    }
+}
+
+// Функция для регистрации
+async function register() {
+    const name = document.getElementById('username').value.trim();
+    const email = document.getElementById('email').value.trim();
+    const pass = document.getElementById('password').value;
+    const confirm = document.getElementById('confirm-password').value;
+    
+    document.getElementById('errorMessage').textContent = '';
+    
+    if(!name||!email||!pass||!confirm){ 
+        document.getElementById('errorMessage').textContent = 'Заполните все поля'; 
+        return; 
+    }
+    if(pass!==confirm){ 
+        document.getElementById('errorMessage').textContent = 'Пароли не совпадают'; 
+        return; 
+    }
+    
+    try {
+        const response = await fetch('/api/register', {
+            method:'POST',
+            headers:{'Content-Type':'application/json'},
+            body: JSON.stringify({name,email,password:pass})
+        });
+        
+        const result = await response.json();
+        
+        if(response.ok){
+            if(result.status === 'registered' || result.status === 'exists') {
+                const userData = result.status === 'registered' ? 
+                    {id: result.id, name: result.name, email: result.email, role: result.role || 'user'} : 
+                    result.user;
+                localStorage.setItem('user', JSON.stringify(userData));
+                // Перенаправляем в зависимости от роли
+                if (userData.role === 'admin') {
+                    window.location.href = '/admin';
+                } else {
+                    window.location.href = '/main.html';
+                }
+            } else {
+                document.getElementById('errorMessage').textContent = 'Ошибка регистрации';
+            }
+        } else {
+            document.getElementById('errorMessage').textContent = result.error || 'Ошибка регистрации';
+        }
+    } catch(err){
+        console.error(err);
+        document.getElementById('errorMessage').textContent = 'Ошибка сети. Попробуйте позже.';
+    }
+}
+
+// Обработчики кнопок
+document.getElementById('loginBtn').addEventListener('click', login);
+document.getElementById('registerBtn').addEventListener('click', register);
+
+// Обработка Enter
+document.addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+        if (document.getElementById('loginForm').style.display !== 'none') {
+            login();
+        } else {
+            register();
+        }
+    }
+});
+</script>
+</body>
+</html>
