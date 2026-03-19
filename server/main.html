@@ -1,0 +1,1257 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ТЕСТЫ</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --black: #0a0a0a;
+            --dark-gray: #1a1a1a;
+            --medium-gray: #333333;
+            --light-gray: #666666;
+            --lighter-gray: #999999;
+            --lightest-gray: #e5e5e5;
+            --white: #ffffff;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--white);
+            color: var(--black);
+            line-height: 1.6;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+            opacity: 0.03;
+            pointer-events: none;
+            z-index: 1000;
+        }
+
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            padding: 20px 60px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 100;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--lightest-gray);
+        }
+
+        .logo {
+            font-family: 'Space Mono', monospace;
+            font-size: 14px;
+            font-weight: 700;
+            letter-spacing: 4px;
+            color: var(--black);
+            cursor: pointer;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 40px;
+            list-style: none;
+        }
+
+        .nav-links a {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--light-gray);
+            text-decoration: none;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            transition: color 0.3s ease;
+            cursor: pointer;
+        }
+
+        .nav-links a:hover,
+        .nav-links a.active {
+            color: var(--black);
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .user-name {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--black);
+        }
+
+        .logout-btn {
+            font-size: 12px;
+            padding: 6px 12px;
+            background: var(--black);
+            color: var(--white);
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: 'Space Mono', monospace;
+        }
+
+        .admin-link {
+            font-size: 12px;
+            padding: 6px 12px;
+            background: var(--medium-gray);
+            color: var(--white);
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: 'Space Mono', monospace;
+            text-decoration: none;
+        }
+
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 120px 60px 60px;
+            text-align: center;
+            position: relative;
+        }
+
+        .hero-title {
+            font-size: clamp(48px, 8vw, 96px);
+            font-weight: 700;
+            line-height: 1;
+            letter-spacing: -3px;
+            margin-bottom: 24px;
+            opacity: 0;
+            transform: translateY(40px);
+            animation: fadeInUp 1s ease forwards;
+        }
+
+        .hero-title span {
+            display: block;
+        }
+
+        .hero-subtitle {
+            font-size: 18px;
+            font-weight: 300;
+            color: var(--light-gray);
+            max-width: 500px;
+            margin-bottom: 50px;
+            opacity: 0;
+            transform: translateY(40px);
+            animation: fadeInUp 1s ease 0.2s forwards;
+        }
+
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .hero-lines {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 100%;
+            max-width: 800px;
+            height: 400px;
+            pointer-events: none;
+            opacity: 0.05;
+        }
+
+        .hero-lines::before,
+        .hero-lines::after {
+            content: '';
+            position: absolute;
+            background: var(--black);
+        }
+
+        .hero-lines::before {
+            width: 1px;
+            height: 100%;
+            left: 50%;
+        }
+
+        .hero-lines::after {
+            width: 100%;
+            height: 1px;
+            top: 50%;
+        }
+
+        .tests-section {
+            padding: 60px;
+            display: none;
+        }
+
+        .tests-section.active {
+            display: block;
+        }
+
+        .tests-header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        .tests-header h2 {
+            font-size: clamp(32px, 4vw, 48px);
+            font-weight: 600;
+            letter-spacing: -1px;
+            margin-bottom: 16px;
+        }
+
+        .tests-header p {
+            font-size: 16px;
+            color: var(--light-gray);
+        }
+
+        .tests-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .test-card {
+            background: var(--white);
+            border: 2px solid var(--black);
+            padding: 50px 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .test-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--black);
+            transform: translateY(100%);
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            z-index: 0;
+        }
+
+        .test-card:hover::before {
+            transform: translateY(0);
+        }
+
+        .test-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .test-card > * {
+            position: relative;
+            z-index: 1;
+            transition: color 0.4s ease;
+        }
+
+        .test-card:hover > * {
+            color: var(--white);
+        }
+
+        .test-card-number {
+            font-family: 'Space Mono', monospace;
+            font-size: 12px;
+            letter-spacing: 2px;
+            color: var(--lighter-gray);
+            margin-bottom: 20px;
+        }
+
+        .test-card-title {
+            font-size: 28px;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+
+        .test-card-desc {
+            font-size: 14px;
+            color: var(--light-gray);
+            margin-bottom: 20px;
+        }
+
+        .test-card-meta {
+            font-family: 'Space Mono', monospace;
+            font-size: 12px;
+            letter-spacing: 1px;
+            color: var(--lighter-gray);
+        }
+
+        .quiz-section {
+            padding: 60px;
+            display: none;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .quiz-section.active {
+            display: block;
+        }
+
+        .quiz-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+        }
+
+        .quiz-progress {
+            flex: 1;
+            margin-right: 30px;
+        }
+
+        .progress-label {
+            font-family: 'Space Mono', monospace;
+            font-size: 12px;
+            letter-spacing: 2px;
+            color: var(--light-gray);
+            margin-bottom: 10px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background: var(--lightest-gray);
+            position: relative;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--black);
+            width: 0%;
+            transition: width 0.4s ease;
+        }
+
+        .quiz-number {
+            font-family: 'Space Mono', monospace;
+            font-size: 14px;
+            font-weight: 700;
+            letter-spacing: 2px;
+        }
+
+        .question-card {
+            background: var(--white);
+            border: 2px solid var(--black);
+            padding: 50px;
+            margin-bottom: 30px;
+        }
+
+        .question-number {
+            font-family: 'Space Mono', monospace;
+            font-size: 12px;
+            letter-spacing: 2px;
+            color: var(--lighter-gray);
+            margin-bottom: 20px;
+        }
+
+        .question-text {
+            font-size: 24px;
+            font-weight: 500;
+            line-height: 1.4;
+            margin-bottom: 40px;
+        }
+
+        .answers-grid {
+            display: grid;
+            gap: 16px;
+        }
+
+        .answer-option {
+            border: 1px solid var(--lightest-gray);
+            border-radius: 0;
+            padding: 20px 24px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 15px;
+            background: var(--white);
+        }
+
+        .answer-option:hover {
+            border-color: var(--black);
+            background: var(--lightest-gray);
+        }
+
+        .answer-option.selected {
+            background: var(--black);
+            color: var(--white);
+            border-color: var(--black);
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 16px;
+        }
+
+        .nav-btn {
+            flex: 1;
+            padding: 18px;
+            font-family: 'Space Mono', monospace;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            border: 2px solid var(--black);
+            background: transparent;
+            color: var(--black);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .nav-btn:hover:not(:disabled) {
+            background: var(--black);
+            color: var(--white);
+        }
+
+        .nav-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .nav-btn.finish-btn {
+            background: var(--black);
+            color: var(--white);
+        }
+
+        .nav-btn.finish-btn:hover {
+            background: var(--white);
+            color: var(--black);
+        }
+
+        .result-section {
+            padding: 60px;
+            display: none;
+            max-width: 700px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .result-section.active {
+            display: block;
+        }
+
+        .result-card {
+            background: var(--white);
+            border: 2px solid var(--black);
+            padding: 60px 40px;
+            margin-bottom: 40px;
+        }
+
+        .result-label {
+            font-family: 'Space Mono', monospace;
+            font-size: 12px;
+            letter-spacing: 3px;
+            color: var(--lighter-gray);
+            margin-bottom: 20px;
+        }
+
+        .result-type {
+            font-size: clamp(36px, 6vw, 64px);
+            font-weight: 700;
+            letter-spacing: -2px;
+            margin-bottom: 20px;
+        }
+
+        .result-description {
+            font-size: 18px;
+            color: var(--light-gray);
+            margin-bottom: 40px;
+            line-height: 1.6;
+        }
+
+        .scores-title {
+            font-family: 'Space Mono', monospace;
+            font-size: 12px;
+            letter-spacing: 2px;
+            color: var(--lighter-gray);
+            margin-bottom: 20px;
+        }
+
+        .scores-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 16px;
+        }
+
+        .score-item {
+            border: 1px solid var(--lightest-gray);
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .score-item.highlight {
+            background: var(--black);
+            color: var(--white);
+            border-color: var(--black);
+        }
+
+        .score-name {
+            font-family: 'Space Mono', monospace;
+            font-size: 11px;
+            letter-spacing: 1px;
+        }
+
+        .score-value {
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        .restart-btn {
+            padding: 18px 40px;
+            font-family: 'Space Mono', monospace;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            border: 2px solid var(--black);
+            background: transparent;
+            color: var(--black);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .restart-btn:hover {
+            background: var(--black);
+            color: var(--white);
+        }
+
+        footer {
+            padding: 40px 60px;
+            background: var(--white);
+            border-top: 1px solid var(--lightest-gray);
+            text-align: center;
+        }
+
+        .footer-text {
+            font-family: 'Space Mono', monospace;
+            font-size: 12px;
+            letter-spacing: 2px;
+            color: var(--lighter-gray);
+        }
+
+        .loading {
+            text-align: center;
+            padding: 50px;
+            font-size: 18px;
+            color: var(--light-gray);
+        }
+
+        .no-tests {
+            text-align: center;
+            padding: 50px;
+            font-size: 18px;
+            color: var(--light-gray);
+            grid-column: 1 / -1;
+        }
+
+        @media (max-width: 768px) {
+            nav {
+                padding: 20px 30px;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            .hero,
+            .tests-section,
+            .quiz-section,
+            .result-section {
+                padding: 100px 30px 40px;
+            }
+
+            .tests-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .question-card {
+                padding: 30px 24px;
+            }
+
+            .question-text {
+                font-size: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="logo" onclick="goHome()">ТЕСТЫ</div>
+        <ul class="nav-links">
+            <li><a onclick="showTests()">Все тесты</a></li>
+        </ul>
+        <div class="user-info" id="userInfo">
+            <span class="user-name" id="userName"></span>
+            <a href="/admin" class="admin-link" id="adminLink" style="display: none;">Админка</a>
+            <button class="logout-btn" onclick="logout()">Выйти</button>
+        </div>
+    </nav>
+
+    <section class="hero" id="hero">
+        <div class="hero-lines"></div>
+        <h1 class="hero-title">
+            <span>УЗНАЙ</span>
+            <span>СЕБЯ</span>
+        </h1>
+        <p class="hero-subtitle">
+            Пройди тесты и узнай всё о себе. 
+            Бесплатно, быстро, интересно.
+        </p>
+        <div class="hero-cta" style="opacity: 0; animation: fadeInUp 1s ease 0.4s forwards;">
+            <button class="btn" onclick="showTests()" style="
+                padding: 18px 40px;
+                font-family: 'Space Mono', monospace;
+                font-size: 12px;
+                font-weight: 700;
+                letter-spacing: 2px;
+                text-transform: uppercase;
+                background: var(--black);
+                color: var(--white);
+                border: none;
+                cursor: pointer;
+                transition: all 0.3s ease;
+            ">Начать тест</button>
+        </div>
+    </section>
+
+    <section class="tests-section" id="testsSection">
+        <div class="tests-header">
+            <h2>Выберите тест</h2>
+            <p>Узнай что-то новое о себе</p>
+        </div>
+        <div class="tests-grid" id="testsGrid">
+            <div class="loading">Загрузка тестов...</div>
+        </div>
+    </section>
+
+    <section class="quiz-section" id="quizSection">
+        <div class="quiz-header">
+            <div class="quiz-progress">
+                <div class="progress-label">ПРОГРЕСС</div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+            </div>
+            <div class="quiz-number" id="quizNumber">01 / 10</div>
+        </div>
+        
+        <div class="question-card">
+            <div class="question-number" id="questionNumber">ВОПРОС 1</div>
+            <div class="question-text" id="questionText"></div>
+            <div class="answers-grid" id="answersContainer"></div>
+        </div>
+        
+        <div class="nav-buttons">
+            <button class="nav-btn" id="prevBtn" onclick="prevQuestion()">Назад</button>
+            <button class="nav-btn" id="nextBtn" onclick="nextQuestion()" style="display: none;">Далее</button>
+            <button class="nav-btn finish-btn" id="finishBtn" onclick="finishTest()" style="display: none;">Завершить</button>
+        </div>
+    </section>
+
+    <section class="result-section" id="resultSection">
+        <div class="result-card">
+            <div class="result-label" id="resultLabel">РЕЗУЛЬТАТ</div>
+            <div class="result-type" id="resultType"></div>
+            <div class="result-description" id="resultDescription"></div>
+            
+            <div class="scores-title" id="scoresTitle">СТАТИСТИКА</div>
+            <div class="scores-grid" id="scoresGrid"></div>
+        </div>
+        
+        <button class="restart-btn" onclick="restartTest()">Пройти заново</button>
+    </section>
+
+    <footer>
+        <div class="footer-text">© 2026 EXIT TESTS. ALL RIGHTS RESERVED.</div>
+    </footer>
+
+    <script>
+        // Глобальные переменные
+        let currentQuestion = 0;
+        let answers = [];
+        let currentTestId = null;
+        let currentTest = null;
+        let user = JSON.parse(localStorage.getItem('user') || '{}');
+        let allTests = [];
+        
+        // Тестовые данные для встроенных тестов (как запасной вариант)
+        const exitVibeQuestions = [
+            {text: "Какая комната из EXIT тебе больше всего нравится?", answers: ["Комната игрока", "Клуб", "Заброшенная школа"]},
+            {text: "Кто тебе больше всего нравится в игре?", answers: ["ГГ", "Барменша", "Голос с телефона"]},
+            {text: "Какая лучшая игра в мире?", answers: ["EXIT", "Rancor", "Weep-7"]},
+            {text: "Что из перечисленного больше тебе подходит?", answers: ["Ты никогда не хочешь быть один", "Ты любишь побыть в одиночестве", "Ты никогда не пишешь первый"]},
+            {text: "Ты пугливый?", answers: ["Да", "Нет"]},
+            {text: "Что выберешь?", answers: ["Свободу", "Стабильность"]},
+            {text: "Какой язык программирования тебе больше всего нравится?", answers: ["C++", "C#", "Python"]},
+            {text: "Какой жанр игр любишь?", answers: ["Экшен", "Хоррор", "Бродилки"]},
+            {text: "Что не умела Екатерина Вторая?", answers: ["Переустанавливать виндовс", "Играть в EXIT"]},
+            {text: "Что тебе больше нравится?", answers: ["Dream core", "Web core", "Kid core"]}
+        ];
+
+        const exitVibeDescriptions = {
+            gg: "Ты - главный герой! Отважный, решительный, всегда готов к приключениям. Твой вайб - исследователь и выживающий.",
+            barmen: "Ты - барменша! Загадочная, притягательная, знаешь всё обо всех. Твой вайб - загадочность и мудрость.",
+            voice: "Ты - голос из рации! Загадочный, всегда в тени, но всегда на связи. Твой вайб - таинственность и помощь.",
+            sheran: "Ты - Шеран! Свободный дух, не признаёшь правил, живёшь в своём мире. Твой вайб - анархия и независимость."
+        };
+
+        const exitVibeNames = {
+            gg: 'ГЛАВНЫЙ ГЕРОЙ',
+            barmen: 'БАРМЕНША',
+            voice: 'ГОЛОС ИЗ РАЦИИ',
+            sheran: 'ШЕРАН'
+        };
+
+        const rowansaQuestions = [
+            {text: "Самый первый завершенный проект разработчика FurDea?", answers: ["SBERMOB++", "Virgin Warrior 2", "RANCOR"], correct: 0},
+            {text: "Какую компанию организовал FurDea?", answers: ["ROWANS", "Rase To Fame", "WEEP-7"], correct: 0},
+            {text: "Какой жанр у игры RANCOR?", answers: ["Визуальная Новелла", "Экшен", "Метроидвания"], correct: 1},
+            {text: "Что изображено на логотипе ROWANS?", answers: ["Рябина", "Крыжовник", "Волчья ягода"], correct: 0},
+            {text: "Второй разработчик RANCOR реален?", answers: ["Да", "Нет", "Немножко"], correct: 2},
+            {text: "Имя маскота ROWANS?", answers: ["Ранкара", "Рива", "Килл"], correct: 0},
+            {text: "Имя персонажа, который есть в каждой истории/игре от FurDea?", answers: ["Аврора", "Килл", "Пряник"], correct: 0},
+            {text: "Самая ненавистная мини игра по мнению игроков в SBERMOB?", answers: ["Редакция документов", "Разнеси кофе работникам", "Помощь по тесту C++"], correct: 1},
+            {text: "На каком стеке был написан SBERMOB?", answers: ["C++ and SFML", "C# and Windows Forms", "Unity"], correct: 0},
+            {text: "В честь чего RANCOR получил special?", answers: ["Новый год", "День святого Валентина", "24 февраля"], correct: 0}
+        ];
+
+        const rowansaDescription = {
+            title: "Твой результат:",
+            100: "Ты настоящий фанат! Знаешь всё о ROWANS!",
+            80: "Отлично! Ты знаешь компанию очень хорошо!",
+            60: "Хорошо! Но есть куда расти!",
+            40: "Неплохо, но нужно ещё поучиться!",
+            20: "Слабовато... Переиграй!",
+            0: "Ты совсем не знаком с ROWANS!"
+        };
+
+        const personalityQuestions = [
+            {text: "Как вы принимаете важные решения?", answers: ["Анализирую факты и риски", "Действую быстро и уверенно", "Учитываю чувства людей", "Полагаюсь на интуицию"]},
+            {text: "В компании вы чаще:", answers: ["Наблюдаю и слушаю", "Беру инициативу", "Поддерживаю разговор и объединяю людей", "Предлагаю необычные идеи"]},
+            {text: "Если возникла проблема:", answers: ["Строю план решения", "Решаю сразу, не откладывая", "Ищу компромисс", "Пробую нестандартный подход"]},
+            {text: "Что вас больше мотивирует?", answers: ["Чёткая цель", "Победа и результат", "Благодарность людей", "Интерес и вдохновение"]},
+            {text: "Рабочий стиль:", answers: ["По плану и спискам", "Быстро и интенсивно", "В команде", "Свободно и творчески"]},
+            {text: "Отдых для вас — это:", answers: ["Спокойствие и порядок", "Активность/спорт", "Встречи с близкими", "Новые впечатления"]},
+            {text: "Если вас критикуют:", answers: ["Анализирую замечания", "Спорю и отстаиваю себя", "Переживаю и стараюсь исправить", "Ищу вдохновение"]},
+            {text: "В школе/работе вы чаще:", answers: ["Отличник/системный сотрудник", "Староста/организатор", "Душа коллектива", "Креативщик"]},
+            {text: "Что вам ближе?", answers: ["Таблицы и данные", "Соревнования", "Помощь людям", "Искусство/идеи"]},
+            {text: "Идеальный проект:", answers: ["Продуманный и структурированный", "Амбициозный и масштабный", "Полезный для людей", "Уникальный и оригинальный"]}
+        ];
+
+        const personalityDescriptions = {
+            strategist: "Рациональный, системный, любит планирование и порядок во всём.",
+            leader: "Решительный, энергичный, всегда ориентирован на результат.",
+            harmonizer: "Эмпатичный, заботливый, ценит отношения и гармонию.",
+            creator: "Креативный, нестандартный, любит свободу и самовыражение.",
+            researcher: "Любопытный, независимый, всегда стремится узнавать новое."
+        };
+
+        const personalityNames = {
+            strategist: 'СТРАТЕГ',
+            leader: 'ЛИДЕР', 
+            harmonizer: 'ГАРМОНИЗАТОР',
+            creator: 'ТВОРЕЦ',
+            researcher: 'ИССЛЕДОВАТЕЛЬ'
+        };
+
+        const researcherQuestions = [1, 5, 9];
+
+        // Инициализация
+        window.addEventListener('load', function() {
+            // Показываем имя пользователя
+            if (user && user.name) {
+                document.getElementById('userName').textContent = user.name;
+            }
+            
+            // Проверяем, админ ли пользователь
+            if (user && user.role === 'admin') {
+                document.getElementById('adminLink').style.display = 'inline-block';
+            }
+            
+            // Загружаем тесты с сервера
+            loadTestsFromServer();
+        });
+
+        function logout() {
+            localStorage.removeItem('user');
+            window.location.href = '/';
+        }
+
+        async function loadTestsFromServer() {
+            const grid = document.getElementById('testsGrid');
+            
+            try {
+                const response = await fetch('/api/get-tests');
+                const result = await response.json();
+                
+                if (result.tests && result.tests.length > 0) {
+                    allTests = result.tests;
+                    renderTests(allTests);
+                } else {
+                    // Если нет тестов с сервера, показываем встроенные
+                    grid.innerHTML = '<div class="no-tests">Нет доступных тестов. Обратитесь к администратору.</div>';
+                    // Можно также показать встроенные тесты:
+                    // renderFallbackTests();
+                }
+            } catch(err) {
+                console.error('Ошибка загрузки тестов:', err);
+                grid.innerHTML = '<div class="no-tests">Ошибка загрузки тестов. Проверьте подключение к серверу.</div>';
+                // Показываем встроенные тесты как запасной вариант
+                renderFallbackTests();
+            }
+        }
+
+        function renderTests(tests) {
+            const grid = document.getElementById('testsGrid');
+            grid.innerHTML = '';
+            
+            if (!tests || tests.length === 0) {
+                grid.innerHTML = '<div class="no-tests">Нет доступных тестов</div>';
+                return;
+            }
+            
+            tests.forEach((test, index) => {
+                const card = document.createElement('div');
+                card.className = 'test-card';
+                card.onclick = () => startTest(test.id);
+                
+                let typeText = '';
+                if (test.test_type === 'exit_vibe') typeText = 'Персонаж';
+                else if (test.test_type === 'rowansa') typeText = 'ROWANS';
+                else if (test.test_type === 'personality') typeText = 'Личность';
+                else typeText = 'Тест';
+                
+                card.innerHTML = `
+                    <div class="test-card-number">${String(index + 1).padStart(2, '0')}</div>
+                    <div class="test-card-title">${test.title || 'Без названия'}</div>
+                    <div class="test-card-desc">${test.description || 'Нет описания'}</div>
+                    <div class="test-card-meta">${typeText}</div>
+                `;
+                
+                grid.appendChild(card);
+            });
+        }
+
+        function renderFallbackTests() {
+            const grid = document.getElementById('testsGrid');
+            grid.innerHTML = `
+                <div class="test-card" onclick="startFallbackTest('exit_vibe')">
+                    <div class="test-card-number">01</div>
+                    <div class="test-card-title">Кто ты из EXIT?</div>
+                    <div class="test-card-desc">Узнай свой персонаж по вайбу</div>
+                    <div class="test-card-meta">Персонаж</div>
+                </div>
+                <div class="test-card" onclick="startFallbackTest('rowansa')">
+                    <div class="test-card-number">02</div>
+                    <div class="test-card-title">Тест на ROWANS</div>
+                    <div class="test-card-desc">Насколько хорошо ты знаешь компанию?</div>
+                    <div class="test-card-meta">ROWANS</div>
+                </div>
+                <div class="test-card" onclick="startFallbackTest('personality')">
+                    <div class="test-card-number">03</div>
+                    <div class="test-card-title">Тип личности</div>
+                    <div class="test-card-desc">Узнай какой ты тип личности</div>
+                    <div class="test-card-meta">Личность</div>
+                </div>
+            `;
+        }
+
+        async function startTest(testId) {
+            try {
+                const response = await fetch('/api/get-test', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({testId})
+                });
+                
+                const result = await response.json();
+                
+                if (result.test) {
+                    currentTestId = testId;
+                    currentTest = result.test;
+                    currentQuestion = 0;
+                    answers = new Array(currentTest.questions.length).fill(null);
+                    
+                    document.getElementById('hero').style.display = 'none';
+                    document.getElementById('testsSection').classList.remove('active');
+                    document.getElementById('quizSection').classList.add('active');
+                    document.getElementById('resultSection').classList.remove('active');
+                    
+                    renderQuestion();
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                } else {
+                    alert('Тест не найден');
+                }
+            } catch(err) {
+                console.error(err);
+                alert('Ошибка загрузки теста');
+            }
+        }
+
+        function startFallbackTest(testType) {
+            currentTestId = null;
+            currentTest = { test_type: testType };
+            
+            if (testType === 'exit_vibe') {
+                currentTest.questions = exitVibeQuestions;
+            } else if (testType === 'rowansa') {
+                currentTest.questions = rowansaQuestions;
+            } else if (testType === 'personality') {
+                currentTest.questions = personalityQuestions;
+            }
+            
+            currentQuestion = 0;
+            answers = new Array(currentTest.questions.length).fill(null);
+            
+            document.getElementById('hero').style.display = 'none';
+            document.getElementById('testsSection').classList.remove('active');
+            document.getElementById('quizSection').classList.add('active');
+            document.getElementById('resultSection').classList.remove('active');
+            
+            renderQuestion();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function renderQuestion() {
+            if (!currentTest || !currentTest.questions) return;
+            
+            const questions = currentTest.questions;
+            const q = questions[currentQuestion];
+            
+            document.getElementById('questionText').textContent = q.text;
+            document.getElementById('questionNumber').textContent = 'ВОПРОС ' + (currentQuestion + 1);
+            document.getElementById('quizNumber').textContent = String(currentQuestion + 1).padStart(2, '0') + ' / ' + answers.length;
+            document.getElementById('progressFill').style.width = ((currentQuestion + 1) / answers.length * 100) + '%';
+            
+            const container = document.getElementById('answersContainer'); 
+            container.innerHTML = '';
+            
+            q.answers.forEach((answer, idx) => {
+                const div = document.createElement('div'); 
+                div.className = 'answer-option' + (answers[currentQuestion] === idx ? ' selected' : '');
+                div.textContent = answer; 
+                div.onclick = () => selectAnswer(idx); 
+                container.appendChild(div);
+            });
+            
+            document.getElementById('prevBtn').disabled = currentQuestion === 0;
+            
+            if(currentQuestion === answers.length - 1){
+                document.getElementById('nextBtn').style.display = 'none';
+                document.getElementById('finishBtn').style.display = 'block';
+            } else {
+                document.getElementById('nextBtn').style.display = 'block';
+                document.getElementById('finishBtn').style.display = 'none';
+            }
+        }
+
+        function selectAnswer(idx){
+            answers[currentQuestion] = idx; 
+            
+            // Обновляем выделение
+            const options = document.querySelectorAll('.answer-option');
+            options.forEach((opt, i) => {
+                if (i === idx) opt.classList.add('selected');
+                else opt.classList.remove('selected');
+            });
+            
+            // Автоматический переход к следующему вопросу
+            if(currentQuestion < answers.length - 1){
+                setTimeout(() => {
+                    currentQuestion++;
+                    renderQuestion();
+                }, 300);
+            }
+        }
+
+        function prevQuestion(){
+            if(currentQuestion > 0){
+                currentQuestion--;
+                renderQuestion();
+            }
+        }
+
+        function nextQuestion(){
+            if(answers[currentQuestion] === null){
+                alert('Выберите ответ');
+                return;
+            } 
+            if(currentQuestion < answers.length - 1){
+                currentQuestion++;
+                renderQuestion();
+            }
+        }
+
+        function finishTest(){
+            if (!currentTest) return;
+            
+            if (currentTest.test_type === 'exit_vibe') {
+                finishExitVibeTest();
+            } else if (currentTest.test_type === 'rowansa') {
+                finishRowansaTest();
+            } else if (currentTest.test_type === 'personality') {
+                finishPersonalityTest();
+            } else {
+                // Для пользовательских тестов показываем простой результат
+                finishCustomTest();
+            }
+            
+            // Сохраняем результат на сервер, если есть пользователь
+            if (user && user.id && currentTestId) {
+                saveResult();
+            }
+        }
+
+        async function saveResult() {
+            const score = answers.filter((ans, idx) => {
+                if (currentTest.test_type === 'rowansa') {
+                    return ans === currentTest.questions[idx].correct;
+                }
+                return ans !== null;
+            }).length;
+            
+            try {
+                await fetch('/api/save-result', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        user_id: user.id,
+                        test_id: currentTestId,
+                        score: score,
+                        total_questions: answers.length,
+                        answers: answers.map((ans, idx) => ({
+                            question_id: currentTest.questions[idx].id || idx,
+                            user_answer: ans !== null ? ans : -1,
+                            is_correct: currentTest.test_type === 'rowansa' ? 
+                                ans === currentTest.questions[idx].correct : (ans !== null ? 1 : 0)
+                        }))
+                    })
+                });
+            } catch(err) {
+                console.error('Ошибка сохранения результата:', err);
+            }
+        }
+
+        function finishExitVibeTest() {
+            const scores = {gg: 0, barmen: 0, voice: 0, sheran: 0};
+            
+            // Проверяем, что ответы есть
+            if (answers.length < 10) return;
+            
+            // Вопрос 1: Комната
+            if (answers[0] === 0) scores.gg++;
+            else if (answers[0] === 1) scores.barmen++;
+            else if (answers[0] === 2) scores.voice++;
+            
+            // Вопрос 2: Персонаж
+            if (answers[1] === 0) scores.gg++;
+            else if (answers[1] === 1) scores.barmen++;
+            else if (answers[1] === 2) scores.voice++;
+            
+            // Вопрос 3: Игра
+            if (answers[2] === 0) scores.gg++;
+            else if (answers[2] === 1) scores.sheran++;
+            else if (answers[2] === 2) scores.voice++;
+            
+            // Вопрос 4: Характер
+            if (answers[3] === 0) scores.barmen++;
+            else if (answers[3] === 1) scores.sheran++;
+            else if (answers[3] === 2) scores.voice++;
+            
+            // Вопрос 5: Пугливость
+            if (answers[4] === 0) scores.gg++;
+            else if (answers[4] === 1) scores.sheran++;
+            
+            // Вопрос 6: Свобода vs Стабильность
+            if (answers[5] === 0) scores.sheran++;
+            else if (answers[5] === 1) scores.barmen++;
+            
+            // Вопрос 7: Язык программирования
+            if (answers[6] === 0) scores.gg++;
+            else if (answers[6] === 1) scores.barmen++;
+            else if (answers[6] === 2) scores.voice++;
+            
+            // Вопрос 8: Жанр игр
+            if (answers[7] === 0) scores.gg++;
+            else if (answers[7] === 1) scores.voice++;
+            else if (answers[7] === 2) scores.sheran++;
+            
+            // Вопрос 9: Екатерина
+            if (answers[8] === 0) scores.barmen++;
+            else if (answers[8] === 1) scores.voice++;
+            
+            // Вопрос 10: Вайб
+            if (answers[9] === 0) scores.gg++;
+            else if (answers[9] === 1) scores.barmen++;
+            else if (answers[9] === 2) scores.sheran++;
+            
+            let topType = Object.entries(scores).sort((a,b) => b[1] - a[1])[0][0];
+
+            showResult('ТВОЙ ПЕРСОНАЖ', topType, scores, exitVibeNames, exitVibeDescriptions, '%');
+        }
+
+        function finishRowansaTest() {
+            const questions = currentTest.questions;
+            let correct = 0;
+            
+            for (let i = 0; i < questions.length; i++) {
+                if (answers[i] === questions[i].correct) {
+                    correct++;
+                }
+            }
+            
+            const percentage = Math.round((correct / questions.length) * 100);
+            
+            let description;
+            if (percentage === 100) description = rowansaDescription[100];
+            else if (percentage >= 80) description = rowansaDescription[80];
+            else if (percentage >= 60) description = rowansaDescription[60];
+            else if (percentage >= 40) description = rowansaDescription[40];
+            else if (percentage >= 20) description = rowansaDescription[20];
+            else description = rowansaDescription[0];
+            
+            document.getElementById('resultLabel').textContent = 'ТВОЙ РЕЗУЛЬТАТ';
+            document.getElementById('resultType').textContent = percentage + '%';
+            document.getElementById('resultDescription').textContent = description;
+            document.getElementById('scoresTitle').textContent = 'ПРАВИЛЬНЫХ ОТВЕТОВ';
+            document.getElementById('scoresGrid').innerHTML = `
+                <div class="score-item highlight" style="grid-column: span 3;">
+                    <div class="score-name">ПРАВИЛЬНО</div>
+                    <div class="score-value">${correct} / ${questions.length}</div>
+                </div>
+            `;
+            
+            document.getElementById('hero').style.display = 'none';
+            document.getElementById('testsSection').classList.remove('active');
+            document.getElementById('quizSection').classList.remove('active');
+            document.getElementById('resultSection').classList.add('active');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function finishPersonalityTest() {
+            const scores = {strategist: 0, leader: 0, harmonizer: 0, creator: 0, researcher: 0};
+            
+            answers.forEach((ans, idx) => {
+                if (ans === 0) scores.strategist++;
+                else if (ans === 1) scores.leader++;
+                else if (ans === 2) scores.harmonizer++;
+                else if (ans === 3) {
+                    if (researcherQuestions.includes(idx)) {
+                        scores.researcher++;
+                    } else {
+                        scores.creator++;
+                    }
+                }
+            });
+            
+            let topType = Object.entries(scores).sort((a,b) => b[1] - a[1])[0][0];
+
+            showResult('ТВОЙ ТИП ЛИЧНОСТИ', topType, scores, personalityNames, personalityDescriptions, 'баллов');
+        }
+
+        function finishCustomTest() {
+            const answered = answers.filter(a => a !== null).length;
+            const percentage = Math.round((answered / answers.length) * 100);
+            
+            document.getElementById('resultLabel').textContent = 'ТЕСТ ПРОЙДЕН';
+            document.getElementById('resultType').textContent = percentage + '%';
+            document.getElementById('resultDescription').textContent = 'Вы ответили на все вопросы!';
+            document.getElementById('scoresTitle').textContent = 'ОТВЕЧЕНО';
+            document.getElementById('scoresGrid').innerHTML = `
+                <div class="score-item highlight" style="grid-column: span 3;">
+                    <div class="score-name">ОТВЕТОВ</div>
+                    <div class="score-value">${answered} / ${answers.length}</div>
+                </div>
+            `;
+            
+            document.getElementById('hero').style.display = 'none';
+            document.getElementById('testsSection').classList.remove('active');
+            document.getElementById('quizSection').classList.remove('active');
+            document.getElementById('resultSection').classList.add('active');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function showResult(label, type, scores, names, descriptions, unit) {
+            document.getElementById('resultLabel').textContent = label;
+            document.getElementById('resultType').textContent = names[type];
+            document.getElementById('resultDescription').textContent = descriptions[type];
+            document.getElementById('scoresTitle').textContent = unit === '%' ? 'ПРОЦЕНТ СОВПАДЕНИЙ' : 'БАЛЛЫ';
+            
+            const scoresGrid = document.getElementById('scoresGrid'); 
+            scoresGrid.innerHTML = '';
+            
+            for(let [key, value] of Object.entries(scores)){
+                const displayValue = unit === '%' ? Math.round((value / 10) * 100) + '%' : value;
+                const div = document.createElement('div'); 
+                div.className = 'score-item' + (key === type ? ' highlight' : '');
+                div.innerHTML = `<div class="score-name">${names[key]}</div><div class="score-value">${displayValue}</div>`; 
+                scoresGrid.appendChild(div);
+            }
+            
+            document.getElementById('hero').style.display = 'none';
+            document.getElementById('testsSection').classList.remove('active');
+            document.getElementById('quizSection').classList.remove('active');
+            document.getElementById('resultSection').classList.add('active');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function goHome() {
+            document.getElementById('hero').style.display = 'flex';
+            document.getElementById('testsSection').classList.remove('active');
+            document.getElementById('quizSection').classList.remove('active');
+            document.getElementById('resultSection').classList.remove('active');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function showTests() {
+            document.getElementById('hero').style.display = 'none';
+            document.getElementById('testsSection').classList.add('active');
+            document.getElementById('quizSection').classList.remove('active');
+            document.getElementById('resultSection').classList.remove('active');
+            
+            // Перезагружаем тесты при показе
+            loadTestsFromServer();
+            
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function restartTest(){
+            showTests();
+        }
+    </script>
+</body>
+</html>
